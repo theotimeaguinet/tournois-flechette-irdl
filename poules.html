@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>IRDL — Classement</title>
+
+<style>
+body { font-family: Arial; margin:0; background:#f4f8fb; }
+
+header {
+    background: linear-gradient(90deg,#2F2C7E,#1B8FC4,#8CC63F);
+    padding:15px;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+header img { height:55px; }
+
+nav a {
+    color:white;
+    text-decoration:none;
+    margin-left:20px;
+    font-weight:bold;
+}
+
+main { padding:25px; text-align:center; }
+
+.card {
+    background:white;
+    margin:20px auto;
+    padding:20px;
+    max-width:700px;
+    border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,.15);
+}
+
+table { width:100%; border-collapse:collapse; }
+
+th, td { border:1px solid #ccc; padding:8px; }
+
+th { background:#1B8FC4; color:white; }
+
+.qualif { background:#d4edda; font-weight:bold; }
+
+h1 { color:#2F2C7E; }
+</style>
+</head>
+
+<body>
+
+<header>
+    <img src="logo.png" alt="IRDL">
+    <nav>
+        <a href="index.html">Accueil</a>
+        <a href="matchs.html">Matchs</a>
+    </nav>
+</header>
+
+<main>
+
+<h1>🏆 Classement des poules</h1>
+
+<div id="classements"></div>
+
+<div class="card">
+<h2>Qualifiés pour les quarts</h2>
+<div id="qualifies"></div>
+</div>
+
+<div class="card">
+<h2>Arbre des quarts de finale</h2>
+<div id="bracket"></div>
+</div>
+
+</main>
+
+<script>
+
+const poules = {
+A:["Lisa","Miako","Clément","Théotime","Edwige","Maxence"],
+B:["Vladimir","Marie","Kelig","Killian","Julie","Xavier"],
+C:["Guillaume","Ilias","Nivesh","Mathis","Vincent","Thibault"]
+}
+
+let matchs = JSON.parse(localStorage.getItem("matchs") || "{}")
+
+function pts(j){
+    let p=0
+    for(let m in matchs){
+        if(matchs[m].j1===j) p+=matchs[m].p1
+        if(matchs[m].j2===j) p+=matchs[m].p2
+    }
+    return p
+}
+
+let troisiemes=[]
+let qualif=[]
+
+for(let nom in poules){
+
+    let joueurs = poules[nom].map(j=>({nom:j,pts:pts(j)}))
+    joueurs.sort((a,b)=>b.pts-a.pts)
+
+    let html = `<div class="card"><h2>Poule ${nom}</h2>
+    <table><tr><th>Joueur</th><th>Points</th></tr>`
+
+    joueurs.forEach((j,i)=>{
+        let c=""
+        if(i<2){ qualif.push(j.nom); c="qualif" }
+        if(i===2) troisiemes.push(j)
+        html+=`<tr class="${c}"><td>${j.nom}</td><td>${j.pts}</td></tr>`
+    })
+
+    html+="</table></div>"
+    document.getElementById("classements").innerHTML+=html
+}
+
+troisiemes.sort((a,b)=>b.pts-a.pts)
+qualif.push(troisiemes[0].nom,troisiemes[1].nom)
+
+document.getElementById("qualifies").innerHTML=qualif.join(" — ")
+
+let q=qualif
+document.getElementById("bracket").innerHTML=`
+${q[0]} vs ${q[7]}<br>
+${q[1]} vs ${q[6]}<br>
+${q[2]} vs ${q[5]}<br>
+${q[3]} vs ${q[4]}
+`
+
+</script>
+
+</body>
+</html>

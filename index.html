@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>IRDL — Tournoi de fléchettes</title>
+
+<style>
+body { font-family: Arial; margin:0; background:#f4f8fb; }
+
+/* HEADER */
+header {
+    background: linear-gradient(90deg,#2F2C7E,#1B8FC4,#8CC63F);
+    padding:15px;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+header img { height:55px; }
+
+nav a {
+    color:white;
+    text-decoration:none;
+    margin-left:20px;
+    font-weight:bold;
+}
+
+/* CONTENU */
+main { padding:25px; text-align:center; }
+
+.card {
+    background:white;
+    max-width:750px;
+    margin:20px auto;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,.15);
+    text-align:left;
+}
+
+h1 { text-align:center; color:#2F2C7E; }
+
+table {
+    width:100%;
+    border-collapse:collapse;
+}
+
+th, td {
+    border:1px solid #ccc;
+    padding:8px;
+    text-align:center;
+}
+
+th { background:#1B8FC4; color:white; }
+
+.buttons {
+    text-align:center;
+    margin-top:25px;
+}
+
+.buttons a {
+    display:inline-block;
+    margin:10px;
+    padding:12px 24px;
+    background:#8CC63F;
+    color:white;
+    text-decoration:none;
+    border-radius:8px;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <img src="logo.png" alt="IRDL">
+    <nav>
+        <a href="index.html">Accueil</a>
+        <a href="poules.html">Classement</a>
+        <a href="matchs.html">Matchs</a>
+    </nav>
+</header>
+
+<main>
+
+<h1>🎯 Tournoi de fléchettes IRDL 🎯</h1>
+
+<div class="card">
+<h2>Participants</h2>
+
+<table>
+<tr><th>Nom</th></tr>
+<tr><td>Nivesh</td></tr>
+<tr><td>Clément</td></tr>
+<tr><td>Vincent</td></tr>
+<tr><td>Théotime</td></tr>
+<tr><td>Xavier</td></tr>
+<tr><td>Edwige</td></tr>
+<tr><td>Ilias</td></tr>
+<tr><td>Thibault</td></tr>
+<tr><td>Maxence</td></tr>
+<tr><td>Killian</td></tr>
+<tr><td>Kelig</td></tr>
+<tr><td>Guillaume</td></tr>
+<tr><td>Lisa</td></tr>
+<tr><td>Marie</td></tr>
+<tr><td>Julie</td></tr>
+<tr><td>Mathis</td></tr>
+<tr><td>Vladimir</td></tr>
+<tr><td>Miako</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h2>Règles du tournoi</h2>
+
+<p>
+🎯 Jeu : 301<br>
+👥 Tous les joueurs d'une poule se rencontrent une fois<br>
+🏆 Victoire = 3 points<br>
+⏱️ Match en 15 manches max<br><br>
+
+Si aucun gagnant après 15 manches :<br>
+➡️ Plus proche de 301 = 1 point<br>
+➡️ Égalité = 1 point chacun<br><br>
+
+Si un joueur atteint 301 :<br>
+➡️ Si l’adversaire est à moins de 20 points → +1 point
+</p>
+</div>
+
+<div class="buttons">
+<a href="poules.html">🏆 Voir les poules</a>
+<a href="matchs.html">🎯 Saisir les scores</a>
+</div>
+
+</main>
+
+</body>
+</html>
