@@ -2,135 +2,75 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>IRDL — Classement</title>
+<title>Poules — Tournoi IRDL</title>
 
 <style>
-body { font-family: Arial; margin:0; background:#f4f8fb; }
-
-header {
-    background: linear-gradient(90deg,#2F2C7E,#1B8FC4,#8CC63F);
-    padding:15px;
-    color:white;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
+body{font-family:Arial;background:#f4f7fb;text-align:center}
+table{
+margin:auto;
+border-collapse:collapse;
+background:white;
+box-shadow:0 4px 12px rgba(0,0,0,0.15)
 }
-
-header img { height:55px; }
-
-nav a {
-    color:white;
-    text-decoration:none;
-    margin-left:20px;
-    font-weight:bold;
-}
-
-main { padding:25px; text-align:center; }
-
-.card {
-    background:white;
-    margin:20px auto;
-    padding:20px;
-    max-width:700px;
-    border-radius:12px;
-    box-shadow:0 4px 10px rgba(0,0,0,.15);
-}
-
-table { width:100%; border-collapse:collapse; }
-
-th, td { border:1px solid #ccc; padding:8px; }
-
-th { background:#1B8FC4; color:white; }
-
-.qualif { background:#d4edda; font-weight:bold; }
-
-h1 { color:#2F2C7E; }
+th,td{padding:8px 15px;border:1px solid #ccc}
+th{background:#0b3d91;color:white}
 </style>
 </head>
 
 <body>
 
-<header>
-    <img src="logo.png" alt="IRDL">
-    <nav>
-        <a href="index.html">Accueil</a>
-        <a href="matchs.html">Matchs</a>
-    </nav>
-</header>
+<h1>🏆 Classement général</h1>
 
-<main>
+<table id="classement">
+<tr><th>Joueur</th><th>Points</th></tr>
+</table>
 
-<h1>🏆 Classement des poules</h1>
+<script type="module">
 
-<div id="classements"></div>
+import { initializeApp } from 
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-<div class="card">
-<h2>Qualifiés pour les quarts</h2>
-<div id="qualifies"></div>
-</div>
+import {
+getFirestore,
+onSnapshot,
+collection
+} from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-<div class="card">
-<h2>Arbre des quarts de finale</h2>
-<div id="bracket"></div>
-</div>
+const firebaseConfig = {
+  apiKey: "AIzaSyDS4nH-NXR28FZOrcTV-Gb4abHqyq2LgNc",
+  authDomain: "tournois-flechettes-irdl.firebaseapp.com",
+  projectId: "tournois-flechettes-irdl",
+  storageBucket: "tournois-flechettes-irdl.firebasestorage.app",
+  messagingSenderId: "1041216462525",
+  appId: "1:1041216462525:web:9d18e15a6167396378a1d4"
+};
 
-</main>
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-<script>
+onSnapshot(collection(db,"matchs"), snap=>{
 
-const poules = {
-A:["Lisa","Miako","Clément","Théotime","Edwige","Maxence"],
-B:["Vladimir","Marie","Kelig","Killian","Julie","Xavier"],
-C:["Guillaume","Ilias","Nivesh","Mathis","Vincent","Thibault"]
-}
+ let scores={}
 
-let matchs = JSON.parse(localStorage.getItem("matchs") || "{}")
+ snap.forEach(doc=>{
+  const m=doc.data()
 
-function pts(j){
-    let p=0
-    for(let m in matchs){
-        if(matchs[m].j1===j) p+=matchs[m].p1
-        if(matchs[m].j2===j) p+=matchs[m].p2
-    }
-    return p
-}
+  scores[m.j1]=(scores[m.j1]||0)+m.p1
+  scores[m.j2]=(scores[m.j2]||0)+m.p2
+ })
 
-let troisiemes=[]
-let qualif=[]
+ const tab=document.getElementById("classement")
 
-for(let nom in poules){
+ tab.innerHTML="<tr><th>Joueur</th><th>Points</th></tr>"
 
-    let joueurs = poules[nom].map(j=>({nom:j,pts:pts(j)}))
-    joueurs.sort((a,b)=>b.pts-a.pts)
-
-    let html = `<div class="card"><h2>Poule ${nom}</h2>
-    <table><tr><th>Joueur</th><th>Points</th></tr>`
-
-    joueurs.forEach((j,i)=>{
-        let c=""
-        if(i<2){ qualif.push(j.nom); c="qualif" }
-        if(i===2) troisiemes.push(j)
-        html+=`<tr class="${c}"><td>${j.nom}</td><td>${j.pts}</td></tr>`
-    })
-
-    html+="</table></div>"
-    document.getElementById("classements").innerHTML+=html
-}
-
-troisiemes.sort((a,b)=>b.pts-a.pts)
-qualif.push(troisiemes[0].nom,troisiemes[1].nom)
-
-document.getElementById("qualifies").innerHTML=qualif.join(" — ")
-
-let q=qualif
-document.getElementById("bracket").innerHTML=`
-${q[0]} vs ${q[7]}<br>
-${q[1]} vs ${q[6]}<br>
-${q[2]} vs ${q[5]}<br>
-${q[3]} vs ${q[4]}
-`
+ Object.entries(scores)
+ .sort((a,b)=>b[1]-a[1])
+ .forEach(e=>{
+  tab.innerHTML+=`<tr><td>${e[0]}</td><td>${e[1]}</td></tr>`
+ })
+})
 
 </script>
-
 </body>
 </html>
