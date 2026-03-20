@@ -100,7 +100,7 @@ let matchs = {}   // ⚠️ plus de localStorage
 function calcPoints(r1, r2){
  if(r1 === 301 && r2 !== 301) return [3, r2 >= 281 ? 1 : 0]
  if(r2 === 301 && r1 !== 301) return [r1 >= 281 ? 1 : 0, 3]
- if(r2 === 10 && r1 === 10) return [0,0]
+ if(r2 === 0 && r1 === 0) return [0,0]
  if(r1 > r2) return [1,0]
  if(r2 > r1) return [0,1]
  return [1,1]
@@ -139,8 +139,8 @@ function valider(id,j1,j2){
  let r1 = parseInt(document.getElementById(id+"r1").value)
  let r2 = parseInt(document.getElementById(id+"r2").value)
 
- if(isNaN(r1)) r1=301
- if(isNaN(r2)) r2=301
+ if(isNaN(r1)) r1=0
+ if(isNaN(r2)) r2=0
 
  let [p1,p2]=calcPoints(r1,r2)
 
