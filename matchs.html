@@ -2,206 +2,132 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>IRDL — Saisie des matchs</title>
+<title>Matchs — Tournoi IRDL</title>
 
 <style>
-body { font-family:Arial; margin:0; background:#f4f8fb; }
+body{font-family:Arial;background:#f4f7fb;text-align:center}
+h1{background:#0b3d91;color:white;padding:15px}
 
-header {
- background: linear-gradient(90deg,#2F2C7E,#1B8FC4,#8CC63F);
- padding:15px;
- color:white;
- display:flex;
- justify-content:space-between;
- align-items:center;
+.match{
+background:white;
+margin:15px auto;
+padding:15px;
+width:350px;
+border-radius:10px;
+box-shadow:0 4px 12px rgba(0,0,0,0.15)
 }
 
-header img { height:55px; }
-
-nav a { color:white; margin-left:20px; text-decoration:none; font-weight:bold; }
-
-main { padding:20px; text-align:center; }
-
-.tabs button {
- padding:10px 20px;
- margin:5px;
- background:#1B8FC4;
- color:white;
- border:none;
- border-radius:8px;
- cursor:pointer;
-}
-
-.match {
- background:white;
- margin:10px auto;
- padding:15px;
- width:380px;
- border-radius:12px;
- box-shadow:0 4px 10px rgba(0,0,0,.15);
-}
-
-input { width:60px; text-align:center; font-size:16px; }
-
-button { margin-top:8px; padding:8px 18px; background:#8CC63F; border:none; border-radius:6px; font-weight:bold; }
-
-.stats {
- background:white;
- margin:20px auto;
- padding:15px;
- width:420px;
- border-radius:12px;
- box-shadow:0 4px 10px rgba(0,0,0,.15);
- text-align:left;
-}
+input{width:60px;font-size:18px;text-align:center}
+button{margin-top:10px;padding:8px 15px;font-size:16px}
 </style>
 </head>
 
 <body>
 
-<header>
-<img src="logo.png">
-<nav>
-<a href="index.html">Accueil</a>
-<a href="poules.html">Classement</a>
-</nav>
-</header>
-
-<main>
-
-<h1>🎯 Saisie des matchs — score restant</h1>
-
-<p>Entrez le score restant (301 = finish)</p>
-
-<div class="tabs">
-<button onclick="showPoule('A')">Poule A</button>
-<button onclick="showPoule('B')">Poule B</button>
-<button onclick="showPoule('C')">Poule C</button>
-</div>
+<h1>🎯 Saisie des matchs</h1>
 
 <div id="matchs"></div>
 
-<div class="stats">
-<h3>📊 Statistiques joueurs</h3>
-<div id="stats"></div>
-</div>
+<script type="module">
 
-</main>
+import { initializeApp } from 
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-<script>
+import {
+getFirestore,
+doc,
+setDoc,
+onSnapshot,
+collection
+} from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const poules = {
-A:["Lisa","Miako","Clément","Théotime","Edwige","Maxence"],
-B:["Vladimir","Marie","Kelig","Killian","Julie","Xavier"],
-C:["Guillaume","Ilias","Nivesh","Mathis","Vincent","Thibault"]
+// CONFIG FOURNIE
+const firebaseConfig = {
+  apiKey: "AIzaSyDS4nH-NXR28FZOrcTV-Gb4abHqyq2LgNc",
+  authDomain: "tournois-flechettes-irdl.firebaseapp.com",
+  projectId: "tournois-flechettes-irdl",
+  storageBucket: "tournois-flechettes-irdl.firebasestorage.app",
+  messagingSenderId: "1041216462525",
+  appId: "1:1041216462525:web:9d18e15a6167396378a1d4"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// JOUEURS EXEMPLE
+const players = [
+"Lisa","Miako","Clément","Théotime","Edwige","Maxence",
+"Vladimir","Marie","Kelig","Killian","Julie","Xavier",
+"Guillaume","Ilias","Nivesh","Mathis","Vincent","Thibault"
+];
+
+// CREATION MATCHS (tous contre tous)
+let matchsList = [];
+for(let i=0;i<players.length;i++){
+ for(let j=i+1;j<players.length;j++){
+  matchsList.push([players[i],players[j]]);
+ }
 }
 
-let matchs = JSON.parse(localStorage.getItem("matchs")||"{}")
+// AFFICHAGE
+const container = document.getElementById("matchs");
 
-function save(){
- localStorage.setItem("matchs", JSON.stringify(matchs))
- calculStats()
-}
+matchsList.forEach((m,i)=>{
+ const id="m"+i;
 
-function calcPoints(r1, r2){
+ const div=document.createElement("div");
+ div.className="match";
 
- // 🎯 CAS 1 — Joueur 1 finit
- if(r1 === 301 && r2 !== 301){
-     return [3, r2 >= 281 ? 1 : 0]
- }
+ div.innerHTML=`
+ <b>${m[0]} vs ${m[1]}</b><br>
+ <input id="${id}r1" type="number" min="0" max="301"> -
+ <input id="${id}r2" type="number" min="0" max="301"><br>
+ <button onclick="save('${id}','${m[0]}','${m[1]}')">Valider</button>
+ `;
 
- // 🎯 CAS 2 — Joueur 2 finit
- if(r2 === 301 && r1 !== 301){
-     return [r1 >= 281 ? 1 : 0, 3]
- }
+ container.appendChild(div);
+});
 
- // ⏱️ CAS 3 — Personne n’a fini (15 manches)
- if(r1 > r2) return [1,0]
- if(r2 > r1) return [0,1]
+// CALCUL POINTS IRDL
+function calc(r1,r2){
 
- // 🤝 Égalité
+ if(r1===0 && r2!==0) return [3, r2<=20?1:0]
+ if(r2===0 && r1!==0) return [r1<=20?1:0, 3]
+ if(r1<r2) return [1,0]
+ if(r2<r1) return [0,1]
  return [1,1]
 }
 
-function showPoule(p){
+// SAUVEGARDE
+window.save = async function(id,j1,j2){
 
- let html=""
- let joueurs=poules[p]
+ let r1 = Number(document.getElementById(id+"r1").value)
+ let r2 = Number(document.getElementById(id+"r2").value)
 
- for(let i=0;i<joueurs.length;i++){
-  for(let j=i+1;j<joueurs.length;j++){
+ if(!Number.isFinite(r1)) r1=301
+ if(!Number.isFinite(r2)) r2=301
 
-   let j1=joueurs[i], j2=joueurs[j]
-   let id=j1+"-"+j2
-   let m=matchs[id]||{}
+ const [p1,p2]=calc(r1,r2)
 
-   html+=`
-   <div class="match">
-   <b>${j1}</b>
-   <input id="${id}r1" type="number" min="0" max="301" value="${m.r1||""}">
-   vs
-   <input id="${id}r2" type="number" min="0" max="301" value="${m.r2||""}">
-   <b>${j2}</b>
-   <br>
-   <button onclick="valider('${id}','${j1}','${j2}')">Valider</button>
-   </div>`
-  }
- }
-
- document.getElementById("matchs").innerHTML=html
+ await setDoc(doc(db,"matchs",id),{
+  j1,j2,r1,r2,p1,p2
+ })
 }
 
-function valider(id,j1,j2){
+// MAJ TEMPS REEL
+onSnapshot(collection(db,"matchs"), snap=>{
 
-let r1 = parseInt(document.getElementById(id+"r1").value)
-let r2 = parseInt(document.getElementById(id+"r2").value)
+ snap.forEach(docu=>{
 
-// si champ vide → 301
-if (isNaN(r1)) r1 = 301
-if (isNaN(r2)) r2 = 301
+  const d=docu.data()
+  const id=docu.id
 
- let [p1,p2]=calcPoints(r1,r2)
-
- matchs[id]={j1,j2,r1,r2,p1,p2}
-
- save()
- alert("Résultat enregistré 👍")
-}
-
-// STATS
-function calculStats(){
-
- let stats={}
-
- for(let p in poules)
-  poules[p].forEach(j=>stats[j]={pts:0,matchs:0,win:0})
-
- for(let m in matchs){
-
-  let d=matchs[m]
-
-  stats[d.j1].pts+=d.p1
-  stats[d.j2].pts+=d.p2
-
-  stats[d.j1].matchs++
-  stats[d.j2].matchs++
-
-  if(d.p1>d.p2) stats[d.j1].win++
-  if(d.p2>d.p1) stats[d.j2].win++
- }
-
- let html=""
- for(let j in stats){
-  html+=`${j} : ${stats[j].pts} pts — ${stats[j].win} victoires<br>`
- }
-
- document.getElementById("stats").innerHTML=html
-}
-
-calculStats()
-showPoule("A")
+  document.getElementById(id+"r1").value=d.r1
+  document.getElementById(id+"r2").value=d.r2
+ })
+})
 
 </script>
-
 </body>
 </html>
